@@ -1,0 +1,21 @@
+#|
+ This file is a part of Trivial-Mimes
+ (c) 2014 TymoonNET/NexT http://tymoon.eu (shinmera@tymoon.eu)
+ Author: Nicolas Hafner <shinmera@tymoon.eu>
+|#
+
+(defpackage #:org.tymoonnext.trivial-mimes.asd
+  (:use #:cl #:asdf))
+(in-package #:org.tymoonnext.trivial-mimes.asd)
+
+(defsystem trivial-mimes
+  :name "Trivial-Mimes"
+  :version "1.0.0"
+  :license "Artistic"
+  :author "Nicolas Hafner <shinmera@tymoon.eu>"
+  :maintainer "Nicolas Hafner <shinmera@tymoon.eu>"
+  :description "Tiny library to detect mime types in files."
+  :homepage "https://github.com/Shinmera/trivial-mimes"
+  :serial T
+  :components ((:file "mime-types"))
+  :depends-on (:uiop))

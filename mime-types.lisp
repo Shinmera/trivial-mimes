@@ -1,0 +1,79 @@
+#|
+ This file is a part of Trivial-Mimes
+ (c) 2014 TymoonNET/NexT http://tymoon.eu (shinmera@tymoon.eu)
+ Author: Nicolas Hafner <shinmera@tymoon.eu>
+|#
+
+(defpackage #:trivial-mimes
+  (:nicknames #:mimes #:org.tymoonnext.trivial-mimes)
+  (:use #:cl)
+  (:export
+   #:*mime-db*
+
+   #:find-mime.types
+   #:mime-probe
+   #:mime-lookup
+   #:mime))
+(in-package #:org.tymoonnext.trivial-mimes)
+
+
+(defun find-mime.types ()
+  "Attempts to find a usable MIME.TYPES file.
+If none can be found, an error is signalled."
+  (or (loop for file in (list #p"/etc/mime.types"
+                              #+asdf (merge-pathnames "mime.types" (asdf:system-source-directory :trivial-mimes)))
+            thereis (probe-file file))
+      (error "No MIME.TYPES file found anywhere!")))
+
+(defvar *mime-db* (make-hash-table :test 'equalp)
+  "An EQUALP hash-table with file-extensions as keys and the mime-types as values.")
+
+(defun whitespace-p (char)
+  (find char '(#\Space #\Newline #\Backspace #\Tab #\Linefeed #\Page #\Return #\Rubout)))
+
+(defun %read-tokens (line)
+  (let ((tokens)
+        (start))
+    (dotimes (i (length line))
+      (let ((char (aref line i)))
+        (cond
+          ((and start (whitespace-p char))
+           (push (subseq line start i) tokens)
+           (setf start NIL))
+          ((not (or start (whitespace-p char)))
+           (setf start i)))))
+    (when start (push (subseq line start) tokens))
+    (nreverse tokens)))
+
+(defun build-mime-db (&optional (file (find-mime.types)))
+  "Populates the *MIME-DB* with data gathered from the file.
+The file should have the following structure:
+
+MIME-TYPE FILE-EXTENSION*"
+  (with-open-file (stream file :direction :input)
+    (loop for line = (read-line stream NIL)
+          while line
+          for tokens = (%read-tokens line)
+          do (dolist (ending (cdr tokens))
+               (setf (gethash ending *mime-db*) (car tokens))))))
+(build-mime-db)
+
+(defun mime-probe (pathname)
+  "Attempts to get the mime-type through a call to the FILE shell utility.
+If the file does not exist or the platform is not unix, NIL is returned."
+  #+unix
+  (when (probe-file pathname)
+    (let ((output (uiop:run-program (list "file" "-bi" (uiop:native-namestring pathname)) :output :string)))
+      (subseq output 0 (position #\; output)))))
+
+(defun mime-lookup (pathname)
+  "Attempts to get the mime-type by file extension comparison.
+If none can be found, NIL is returned."
+  (gethash (pathname-type pathname) *mime-db*))
+
+(defun mime (pathname &optional (default "application/octet-stream"))
+  "Attempts to detect the mime-type of the given pathname.
+First uses MIME-PROBE, then MIME-LOOKUP and lastly returns the DEFAULT if both fail."
+  (or (mime-probe pathname)
+      (mime-lookup pathname)
+      default))
