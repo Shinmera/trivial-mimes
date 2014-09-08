@@ -18,4 +18,4 @@
   :homepage "https://github.com/Shinmera/trivial-mimes"
   :serial T
   :components ((:file "mime-types"))
-  :depends-on (:uiop))
+  :depends-on ())
