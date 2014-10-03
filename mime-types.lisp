@@ -13,7 +13,8 @@
    #:find-mime.types
    #:mime-probe
    #:mime-lookup
-   #:mime))
+   #:mime
+   #:mime-file-type))
 (in-package #:org.tymoonnext.trivial-mimes)
 
 
@@ -27,6 +28,8 @@ If none can be found, an error is signalled."
 
 (defvar *mime-db* (make-hash-table :test 'equalp)
   "An EQUALP hash-table with file-extensions as keys and the mime-types as values.")
+(defvar *reverse-mime-db* (make-hash-table :test 'equalp)
+  "An EQUALP hash-table with mime-types as keys and the file-extensions as values.")
 
 (defun whitespace-p (char)
   (find char '(#\Space #\Newline #\Backspace #\Tab #\Linefeed #\Page #\Return #\Rubout)))
@@ -55,7 +58,8 @@ MIME-TYPE FILE-EXTENSION*"
           while line
           for tokens = (%read-tokens line)
           do (dolist (ending (cdr tokens))
-               (setf (gethash ending *mime-db*) (car tokens))))))
+               (setf (gethash ending *mime-db*) (car tokens)))
+             (setf (gethash (first tokens) *reverse-mime-db*) (second tokens)))))
 (build-mime-db)
 
 (defun mime-probe (pathname)
@@ -77,3 +81,8 @@ First uses MIME-PROBE, then MIME-LOOKUP and lastly returns the DEFAULT if both f
   (or (mime-probe pathname)
       (mime-lookup pathname)
       default))
+
+(defun mime-file-type (mime-type)
+  "Returns a matching file-extension for the given mime-type.
+If the given mime-type cannot be found, NIL is returned."
+  (gethash mime-type *reverse-mime-db*))
