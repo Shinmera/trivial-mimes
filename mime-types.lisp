@@ -79,9 +79,9 @@ If none can be found, NIL is returned."
 
 (defun mime (pathname &optional (default "application/octet-stream"))
   "Attempts to detect the mime-type of the given pathname.
-First uses MIME-PROBE, then MIME-LOOKUP and lastly returns the DEFAULT if both fail."
-  (or (mime-probe pathname)
-      (mime-lookup pathname)
+First uses MIME-LOOKUP, then MIME-PROBE and lastly returns the DEFAULT if both fail."
+  (or (mime-lookup pathname)
+      (mime-probe pathname)
       default))
 
 (defun mime-file-type (mime-type)
