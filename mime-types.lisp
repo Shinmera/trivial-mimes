@@ -68,7 +68,9 @@ If the file does not exist or the platform is not unix, NIL is returned."
   #+unix
   (when (probe-file pathname)
     (let ((output (uiop:run-program (list "file" "-bi" (uiop:native-namestring pathname)) :output :string)))
-      (subseq output 0 (position #\; output)))))
+      (subseq output 0 (position #\; output))))
+  #-unix
+  NIL)
 
 (defun mime-lookup (pathname)
   "Attempts to get the mime-type by file extension comparison.
