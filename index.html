@@ -8,7 +8,7 @@
       h1{display:inline-block;font-size: 28pt;margin-bottom:0;}
       code{font-family: Consolas, Inconsolata, monospace;}
       h4{display: inline-block;margin:0;padding:0;}
-      ul{list-style: none;}
+      #symbol-index ul{list-style: none;}
       .package li{margin-bottom: 20px;}
       .package pre{margin: 0 0 0 10px; white-space: pre-wrap;}
       .package .nicknames{font-size: 12pt; font-weight: normal;}
@@ -19,12 +19,12 @@
   <body>
     <header>
       <h1>trivial-mimes</h1>
-      <span>1.0.0</span>
+      <span>1.1.0</span>
       <p>Tiny library to detect mime types in files.</p>
     </header>
     <div id="content">
       <article>
-        <documentate>
+        <c:documentate>
           <span><h2>About Trivial-Mimes</h2>
 
 <p>This is a teensy library that provides some functions to determine the mime-type of a file. As I've had a need for this kind of functionality more than once now and haven't found any suitably lightweight alternative I quickly whipped this up.</p>
@@ -33,15 +33,15 @@
 
 <pre><code>(<a href="#TRIVIAL-MIMES:MIME">mimes:mime</a> #p&quot;~/something.png&quot;)</code></pre>
 
-<p>Upon loading, trivial-mimes builds a mime-type database from the local <code>mime.types</code> file or a copy thereof from its own source directory. This database is a simple association of file extension to mime-type. Since this is rather primitive and error-prone, trivial-mimes will instead try to consult the <code>file</code> shell utility on unix systems. If that doesn't work, it falls back onto the mentioned database.</p>
+<p>Upon loading, trivial-mimes builds a mime-type database from the local <code>mime.types</code> file or a copy thereof from its own source directory. This database is a simple association of file extension to mime-type (see <code><a href="#TRIVIAL-MIMES:MIME-LOOKUP">mime-lookup</a></code>). If the mime lookup in the database fails, it will instead try to consult the <code>file</code> shell utility on unix systems (see <code><a href="#TRIVIAL-MIMES:MIME-PROBE">mime-probe</a></code>). If that too doesn't work, it falls back onto a default.</p>
 </span>
-        </documentate>
+        </c:documentate>
       </article>
       <article>
         <h2>Copyright</h2>
         <span>trivial-mimes</span> is licensed under the <span><a href="https://tldrlegal.com/search?q=Artistic">Artistic</a></span> license and ©<span>2014</span> <span>Nicolas Hafner &lt;shinmera@tymoon.eu&gt;</span>. This library can be obtained on <a href="https://github.com/Shinmera/trivial-mimes">https://github.com/Shinmera/trivial-mimes</a>.
       </article>
-      <article>
+      <article id="symbol-index">
         <h2>Package Index</h2>
         <ul><li class="package">
             <h3>
@@ -55,8 +55,8 @@
                     <span>FUNCTION</span>
                     <code>
                       <h4><a href="#TRIVIAL-MIMES:FIND-MIME.TYPES">FIND-MIME.TYPES</a></h4>
-                      <span></span>
-                      <span></span>
+                      <span/>
+                      <span/>
                     </code>
                   </header>
                   <pre>Attempts to find a usable MIME.TYPES file.
@@ -69,12 +69,26 @@ If none can be found, an error is signalled.</pre>
                     <span>FUNCTION</span>
                     <code>
                       <h4><a href="#TRIVIAL-MIMES:MIME">MIME</a></h4>
-                      <span></span>
+                      <span/>
                       <span>(PATHNAME &amp;OPTIONAL (DEFAULT application/octet-stream))</span>
                     </code>
                   </header>
                   <pre>Attempts to detect the mime-type of the given pathname.
-First uses MIME-PROBE, then MIME-LOOKUP and lastly returns the DEFAULT if both fail.</pre>
+First uses MIME-LOOKUP, then MIME-PROBE and lastly returns the DEFAULT if both fail.</pre>
+                </article>
+              </li><li>
+                <a name="TRIVIAL-MIMES:MIME-FILE-TYPE"/>
+                <article>
+                  <header>
+                    <span>FUNCTION</span>
+                    <code>
+                      <h4><a href="#TRIVIAL-MIMES:MIME-FILE-TYPE">MIME-FILE-TYPE</a></h4>
+                      <span/>
+                      <span>(MIME-TYPE)</span>
+                    </code>
+                  </header>
+                  <pre>Returns a matching file-extension for the given mime-type.
+If the given mime-type cannot be found, NIL is returned.</pre>
                 </article>
               </li><li>
                 <a name="TRIVIAL-MIMES:MIME-LOOKUP"/>
@@ -83,7 +97,7 @@ First uses MIME-PROBE, then MIME-LOOKUP and lastly returns the DEFAULT if both f
                     <span>FUNCTION</span>
                     <code>
                       <h4><a href="#TRIVIAL-MIMES:MIME-LOOKUP">MIME-LOOKUP</a></h4>
-                      <span></span>
+                      <span/>
                       <span>(PATHNAME)</span>
                     </code>
                   </header>
@@ -97,7 +111,7 @@ If none can be found, NIL is returned.</pre>
                     <span>FUNCTION</span>
                     <code>
                       <h4><a href="#TRIVIAL-MIMES:MIME-PROBE">MIME-PROBE</a></h4>
-                      <span></span>
+                      <span/>
                       <span>(PATHNAME)</span>
                     </code>
                   </header>
@@ -111,10 +125,15 @@ If the file does not exist or the platform is not unix, NIL is returned.</pre>
                     <span>SPECIAL</span>
                     <code>
                       <h4><a href="#TRIVIAL-MIMES:*MIME-DB*">*MIME-DB*</a></h4>
-                      <span></span>
-                      <span></span>
+                      <span/>
+                      <span/>
                     </code>
                   </header>
                   <pre>An EQUALP hash-table with file-extensions as keys and the mime-types as values.</pre>
                 </article>
-              </li></ul></li></ul></article></div></body></html>
+              </li></ul>
+          </li></ul>
+      </article>
+    </div>
+  </body>
+</html>
