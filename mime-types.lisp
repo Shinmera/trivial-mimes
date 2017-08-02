@@ -42,7 +42,7 @@ If none can be found, an error is signalled."
         (cond
           ((and start (whitespace-p char))
            (push (subseq line start i) tokens)
-           (setf start NIL))
+           (setf start nil))
           ((not (or start (whitespace-p char)))
            (setf start i)))))
     (when start (push (subseq line start) tokens))
@@ -54,7 +54,7 @@ The file should have the following structure:
 
 MIME-TYPE FILE-EXTENSION*"
   (with-open-file (stream file :direction :input)
-    (loop for line = (read-line stream NIL)
+    (loop for line = (read-line stream nil)
           while line
           for tokens = (%read-tokens line)
           do (dolist (ending (cdr tokens))
@@ -72,7 +72,7 @@ If the file does not exist or the platform is not unix, NIL is returned."
                                     :output :string)))
       (subseq output 0 (position #\; output))))
   #-unix
-  NIL)
+  nil)
 
 (defun mime-lookup (pathname)
   "Attempts to get the mime-type by file extension comparison.
