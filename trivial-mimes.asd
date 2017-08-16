@@ -4,10 +4,6 @@
  Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(defpackage #:org.tymoonnext.trivial-mimes.asd
-  (:use #:cl #:asdf))
-(in-package #:org.tymoonnext.trivial-mimes.asd)
-
 (defsystem trivial-mimes
   :name "Trivial-Mimes"
   :version "1.1.0"
