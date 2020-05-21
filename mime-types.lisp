@@ -67,10 +67,13 @@ MIME-TYPE FILE-EXTENSION*"
 If the file does not exist or the platform is not unix, NIL is returned."
   #+unix
   (when (probe-file pathname)
-    (let ((output (uiop:run-program (list "file" #+darwin "-bI" #-darwin "-bi"
+    (let* ((output (uiop:run-program (list "file" #+darwin "-bI" #-darwin "-bi"
                                                  (uiop:native-namestring pathname))
-                                    :output :string)))
-      (subseq output 0 (position #\; output))))
+                                    :output :string))
+           (mime-end (position #\; output)))
+      (if mime-end ; sometimes the charset is not detected. (e.g. symlink)
+          (subseq output 0 mime-end)
+          (subseq output 0 (1- (length output))))))
   #-unix
   NIL)
 
