@@ -70,7 +70,12 @@ If the file does not exist or the platform is not unix, NIL is returned."
     (let ((output (uiop:run-program (list "file" #+darwin "-bI" #-darwin "-bi"
                                                  (uiop:native-namestring pathname))
                                     :output :string)))
-      (subseq output 0 (position #\; output))))
+      (with-output-to-string (mime)
+        (loop for c across output
+              for char = (char-downcase char)
+              ;; Allowed characters as per RFC6383
+              while (find char "abcdefghijklmnopqrstuvwxyz0123456789!#$&-^_.+/")
+              do (write-char char mime)))))
   #-unix
   NIL)
 
