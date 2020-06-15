@@ -72,7 +72,7 @@ If the file does not exist or the platform is not unix, NIL is returned."
                                     :output :string)))
       (with-output-to-string (mime)
         (loop for c across output
-              for char = (char-downcase char)
+              for char = (char-downcase c)
               ;; Allowed characters as per RFC6383
               while (find char "abcdefghijklmnopqrstuvwxyz0123456789!#$&-^_.+/")
               do (write-char char mime)))))
