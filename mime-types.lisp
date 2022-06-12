@@ -48,6 +48,11 @@ If none can be found, an error is signalled."
     (when start (push (subseq line start) tokens))
     (nreverse tokens)))
 
+(defun valid-name-p (name)
+  "According to RFC6838 type names MUST start with an alphanumeric character
+This also conveniently skips comments"
+  (and name (alphanumericp (elt name 0))))
+
 (defun build-mime-db (&optional (file (find-mime.types)))
   "Populates the *MIME-DB* with data gathered from the file.
 The file should have the following structure:
@@ -57,6 +62,7 @@ MIME-TYPE FILE-EXTENSION*"
     (loop for line = (read-line stream NIL)
           while line
           for tokens = (%read-tokens line)
+          when (valid-name-p (first tokens))
           do (dolist (ending (cdr tokens))
                (setf (gethash ending *mime-db*) (car tokens)))
              (setf (gethash (first tokens) *reverse-mime-db*) (second tokens)))))
