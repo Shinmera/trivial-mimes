@@ -14,7 +14,9 @@
    #:mime-probe
    #:mime-lookup
    #:mime
-   #:mime-file-type))
+   #:mime-file-type
+   #:mime-equal
+   #:mime-case))
 (in-package #:org.tymoonnext.trivial-mimes)
 
 
@@ -101,3 +103,64 @@ First uses MIME-LOOKUP, then MIME-PROBE and lastly returns the DEFAULT if both f
   "Returns a matching file-extension for the given mime-type.
 If the given mime-type cannot be found, NIL is returned."
   (gethash mime-type *reverse-mime-db*))
+
+(defun mime-equal (m1 m2)
+  "Checks whether M1 and M2 are matching.
+
+In particular, checks the match of type and subtype (any of which can
+be asterisks), discarding any parameters there might be.
+
+\(mime-equal \"text/*\" \"text/html\")
+T
+
+\(mime-equal \"text/html\" \"text/html;charset=utf8\")
+T
+
+\(mime-equal \"*/*\" \"application/octet-stream\")
+T
+
+\(mime-equal \"text/*\" \"application/octet-stream\")
+NIL"
+  (or (equal "*" m1)
+      (equal "*" m2)
+      (equal "*/*" m1)
+      (equal "*/*" m2)
+      (destructuring-bind (type1 subtype1 &rest parameters1)
+          (uiop:split-string m1 :separator '(#\/ #\;))
+        (declare (ignorable parameters1))
+        (destructuring-bind (type2 subtype2 &rest parameters2)
+            (uiop:split-string m2 :separator '(#\/ #\;))
+          (declare (ignorable parameters2))
+          (cond
+            ((or (equal "*" subtype1)
+                 (equal "*" subtype2)
+                 (equal "" subtype1)
+                 (equal "" subtype2))
+             (string-equal type1 type2))
+            ((string-equal type1 type2)
+             (string-equal subtype1 subtype2))
+            (t nil))))))
+
+(defmacro mime-case (file &body cases)
+  "A case-like macro that works with MIME type of FILE.
+
+Otherwise clause is the last clause that starts with T or OTHERWISE,.
+
+Example:
+\(mime-case #p\"~/CHANGES.txt\"
+  ((\"application/json\" \"application/*\") \"Something opaque...\")
+  (\"text/plain\" \"That's a plaintext file :D\")
+  (t \"I don't know this type!\"))"
+  (let ((mime (gensym "mime")))
+    `(let ((,mime (mime ,file)))
+       (cond
+         ,@(loop for ((mimes . body) . rest) on cases
+                 when (member mimes '(T OTHERWISE))
+                   collect `(t ,@body) into clauses
+                   and do (if rest
+                              (warn "Clauses after T and OTHERWISE are not reachable.")
+                              (return clauses))
+                 collect `((member ,mime (list ,@(uiop:ensure-list mimes)) :test #'mime-equal)
+                           ,@body)
+                   into clauses
+                 finally (return clauses))))))
