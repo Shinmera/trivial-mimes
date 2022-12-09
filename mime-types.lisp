@@ -11,6 +11,7 @@
    #:*mime-db*
 
    #:find-mime.types
+   #:mime-add
    #:mime-probe
    #:mime-lookup
    #:mime
@@ -55,6 +56,14 @@ If none can be found, an error is signalled."
 This also conveniently skips comments"
   (and name (alphanumericp (elt name 0))))
 
+(defun mime-add (mime &rest file-extensions)
+  "Add MIME and FILE-EXTENSIONS associations to *MIME-DB* and *REVERSE-MIME-DB*.
+Makes the provided MIME and FILE-EXTENSIONS properly look-up-able with
+MIME, MIME-PROBE and other trivial-mimes functions."
+  (dolist (extension file-extensions)
+    (setf (gethash extension *mime-db*) mime))
+  (setf (gethash mime *reverse-mime-db*) (first file-extensions)))
+
 (defun build-mime-db (&optional (file (find-mime.types)))
   "Populates the *MIME-DB* with data gathered from the file.
 The file should have the following structure:
@@ -65,9 +74,7 @@ MIME-TYPE FILE-EXTENSION*"
           while line
           for tokens = (%read-tokens line)
           when (valid-name-p (first tokens))
-          do (dolist (ending (cdr tokens))
-               (setf (gethash ending *mime-db*) (car tokens)))
-             (setf (gethash (first tokens) *reverse-mime-db*) (second tokens)))))
+            do (apply #'mime-add tokens))))
 (build-mime-db)
 
 (defun mime-probe (pathname)
