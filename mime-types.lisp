@@ -1,9 +1,3 @@
-#|
- This file is a part of Trivial-Mimes
- (c) 2014 Shirakumo http://tymoon.eu (shinmera@tymoon.eu)
- Author: Nicolas Hafner <shinmera@tymoon.eu>
-|#
-
 (defpackage #:trivial-mimes
   (:nicknames #:mimes #:org.tymoonnext.trivial-mimes)
   (:use #:cl)
