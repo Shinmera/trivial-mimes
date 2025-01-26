@@ -74,7 +74,7 @@ MIME-TYPE FILE-EXTENSION*"
 (defun mime-probe (pathname)
   "Attempts to get the mime-type through a call to the FILE shell utility.
 If the file does not exist or the platform is not unix, NIL is returned."
-  #+unix
+  #+(and unix asdf)
   (when (probe-file pathname)
     (let ((output (uiop:run-program (list "file" #+darwin "-bI" #-darwin "-bi"
                                                  (uiop:native-namestring pathname))
@@ -105,6 +105,19 @@ First uses MIME-LOOKUP, then MIME-PROBE and lastly returns the DEFAULT if both f
 If the given mime-type cannot be found, NIL is returned."
   (gethash mime-type *reverse-mime-db*))
 
+(defun split (string &rest split)
+  (let ((items ()) (out (make-string-output-stream)))
+    (flet ((push-item ()
+             (let ((string (get-output-stream-string out)))
+               (when (string/= "" string)
+                 (push string items)))))
+      (loop for char across string
+            do (if (member char split)
+                   (push-item)
+                   (write-char char out))
+            finally (push-item))
+      (nreverse items))))
+
 (defun mime-equal (m1 m2)
   "Checks whether M1 and M2 are matching.
 
@@ -126,12 +139,10 @@ NIL"
       (equal "*" m2)
       (equal "*/*" m1)
       (equal "*/*" m2)
-      (destructuring-bind (type1 subtype1 &rest parameters1)
-          (uiop:split-string m1 :separator '(#\/ #\;))
-        (declare (ignorable parameters1))
-        (destructuring-bind (type2 subtype2 &rest parameters2)
-            (uiop:split-string m2 :separator '(#\/ #\;))
-          (declare (ignorable parameters2))
+      (destructuring-bind (type1 subtype1 &rest parameters1) (split m1 #\/ #\;)
+        (declare (ignore parameters1))
+        (destructuring-bind (type2 subtype2 &rest parameters2) (split m2 #\/ #\;)
+          (declare (ignore parameters2))
           (cond
             ((or (equal "*" subtype1)
                  (equal "*" subtype2)
@@ -161,7 +172,7 @@ Example:
                    and do (if rest
                               (warn "Clauses after T and OTHERWISE are not reachable.")
                               (return clauses))
-                 collect `((member ,mime (list ,@(uiop:ensure-list mimes)) :test #'mime-equal)
+                 collect `((member ,mime (list ,@(if (listp mimes) mimes (list mimes))) :test #'mime-equal)
                            ,@body)
                    into clauses
                  finally (return clauses))))))
