@@ -14,12 +14,12 @@
    #:mime-case))
 (in-package #:org.tymoonnext.trivial-mimes)
 
+(defvar *here* #.(make-pathname :name NIL :type NIL :defaults (or *compile-file-pathname* *load-pathname*)))
 
 (defun find-mime.types ()
   "Attempts to find a usable MIME.TYPES file.
 If none can be found, an error is signalled."
-  (or (loop for file in (list #p"/etc/mime.types"
-                              #+asdf (merge-pathnames "mime.types" (asdf:system-source-directory :trivial-mimes)))
+  (or (loop for file in (list #p"/etc/mime.types" (merge-pathnames "mime.types" *here*))
             thereis (probe-file file))
       (error "No MIME.TYPES file found anywhere!")))
 
@@ -74,7 +74,7 @@ MIME-TYPE FILE-EXTENSION*"
 (defun mime-probe (pathname)
   "Attempts to get the mime-type through a call to the FILE shell utility.
 If the file does not exist or the platform is not unix, NIL is returned."
-  #+(and unix asdf)
+  #+(and unix asdf3)
   (when (probe-file pathname)
     (let ((output (uiop:run-program (list "file" #+darwin "-bI" #-darwin "-bi"
                                                  (uiop:native-namestring pathname))
